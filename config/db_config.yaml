@@ -1,0 +1,5 @@
+Host    : "DB_ADDR"
+Port    : "5432"
+Username: "postgres"
+DBName  : "weatherman"
+SSLMode : "disable"
