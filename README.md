@@ -21,6 +21,7 @@
 
 ### Docker
 `docker build -t "weatherman" .`
+
 `docker build -t "weatherman_pg" ./db/`
 
 ## _Run app_
@@ -30,6 +31,7 @@
 
 ### Docker
 `docker run -p 5432:5432 -e POSTGRES_PASSWORD=<YOUR-POSTGRES-PASSWORD> -d weatherman_pg`
+
 `docker run -p 8888:8888 weatherman`
 
 ## _API endpoints_
