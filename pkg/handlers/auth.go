@@ -30,6 +30,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := "Error while creating user: " + err.Error()
 		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		return
 	}
 
 	resp := map[string]string{"id": strconv.Itoa(id)}
@@ -37,13 +38,6 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
-	allowedMethods := []string{"POST"}
-
-	if err := checkMethod(r, allowedMethods); err != nil {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
 	var user users.User
 	body, err := io.ReadAll(r.Body)
 
@@ -64,6 +58,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := "Error while creating user: " + err.Error()
 		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		return
 	}
 
 	resp := map[string]string{"token": token}
