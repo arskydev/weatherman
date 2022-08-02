@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/arskydev/weatherman/internal/formater"
@@ -13,24 +12,24 @@ func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
 	ip, err := network.GetRemoteIp(r)
 
 	if err != nil {
-		msg := fmt.Sprint("Error on GetRemoteIp:\n", err)
-		w.Write([]byte(msg))
+		msg := "Error while getting user IP"
+		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
 		return
 	}
 
 	_weather, err := weather.GetWeather(ip)
 
 	if err != nil {
-		msg := fmt.Sprint("Error on GetWeather:\n", err)
-		w.Write([]byte(msg))
+		msg := "Error while getting weather"
+		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
 		return
 	}
 
 	j, err := formater.FormatWeatherJson(_weather)
 
 	if err != nil {
-		msg := fmt.Sprint("Error on FormatWeatherJson:\n", err)
-		w.Write([]byte(msg))
+		msg := "Error while formating JSON response"
+		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
 		return
 	}
 
