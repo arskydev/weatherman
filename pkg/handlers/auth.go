@@ -12,6 +12,7 @@ import (
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	var user users.User
 	body, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
 
 	if err != nil {
 		msg := "Invalid request body"
@@ -40,6 +41,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	var user users.User
 	body, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
 
 	if err != nil {
 		msg := "Invalid request body"
