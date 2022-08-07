@@ -54,7 +54,7 @@ func main() {
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 
-	if err := server.Run(appConfig.APP_PORT, ctx); err != nil {
+	if err := server.Run(ctx, appConfig.APP_PORT); err != nil {
 		log.Printf("Error raised while server run:\n%s", err.Error())
 	}
 

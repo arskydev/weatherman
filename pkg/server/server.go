@@ -27,7 +27,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	return s.httpServer.Shutdown(ctx)
 }
 
-func (s *Server) Run(port string, ctx context.Context) error {
+func (s *Server) Run(ctx context.Context, port string) error {
 	s.httpServer = &http.Server{
 		Addr:           ":" + port,
 		Handler:        s.handler,
