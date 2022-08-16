@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-func jsonResp(resp map[string]string, statusCode int, w http.ResponseWriter) {
-	j, err := json.Marshal(resp)
+func jsonResponse(resp map[string]string, statusCode int, w http.ResponseWriter) {
+	js, err := json.Marshal(resp)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -15,17 +15,16 @@ func jsonResp(resp map[string]string, statusCode int, w http.ResponseWriter) {
 		return
 	}
 
-	w.WriteHeader(statusCode)
-	w.Write(j)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
-func JSONResp(resp map[string]string, statusCode int, w http.ResponseWriter) {
-	jsonResp(resp, statusCode, w)
+func SendJSONResponse(resp map[string]string, statusCode int, w http.ResponseWriter) {
+	jsonResponse(resp, statusCode, w)
 }
 
 func SendErrorResponse(msg string, statusCode int, w http.ResponseWriter, err error) {
 	resp := map[string]string{"msg": msg}
-	w.WriteHeader(statusCode)
-	jsonResp(resp, statusCode, w)
+	jsonResponse(resp, statusCode, w)
 	log.Println("Error while reading request body", err)
 }

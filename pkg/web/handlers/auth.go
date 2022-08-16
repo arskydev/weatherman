@@ -36,7 +36,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := map[string]string{"id": strconv.Itoa(id)}
-	responder.JSONResp(resp, http.StatusCreated, w)
+	responder.SendJSONResponse(resp, http.StatusCreated, w)
 }
 
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
@@ -65,5 +65,5 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := map[string]string{"token": token}
-	responder.JSONResp(resp, http.StatusOK, w)
+	responder.SendJSONResponse(resp, http.StatusOK, w)
 }
