@@ -1,4 +1,4 @@
-package handlers
+package responder
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (h *Handler) sendSimpleResponse(resp map[string]string, statusCode int, w http.ResponseWriter) {
+func jsonResp(resp map[string]string, statusCode int, w http.ResponseWriter) {
 	j, err := json.Marshal(resp)
 
 	if err != nil {
@@ -19,9 +19,13 @@ func (h *Handler) sendSimpleResponse(resp map[string]string, statusCode int, w h
 	w.Write(j)
 }
 
-func (h *Handler) sendErrorResponse(msg string, statusCode int, w http.ResponseWriter, err error) {
+func JSONResp(resp map[string]string, statusCode int, w http.ResponseWriter) {
+	jsonResp(resp, statusCode, w)
+}
+
+func SendErrorResponse(msg string, statusCode int, w http.ResponseWriter, err error) {
 	resp := map[string]string{"msg": msg}
 	w.WriteHeader(statusCode)
-	h.sendSimpleResponse(resp, statusCode, w)
+	jsonResp(resp, statusCode, w)
 	log.Println("Error while reading request body", err)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/arskydev/weatherman/internal/formater"
 	"github.com/arskydev/weatherman/internal/network"
 	"github.com/arskydev/weatherman/internal/weather"
+	"github.com/arskydev/weatherman/pkg/web/internal/responder"
 )
 
 func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +14,7 @@ func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while getting user IP"
-		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
 		return
 	}
 
@@ -21,7 +22,7 @@ func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while getting weather"
-		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
 		return
 	}
 
@@ -29,7 +30,7 @@ func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while formating JSON response"
-		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
 		return
 	}
 

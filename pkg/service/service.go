@@ -13,7 +13,7 @@ type Authorization interface {
 }
 
 type Service struct {
-	Authorization
+	Authorization Authorization
 }
 
 func NewService(r *repository.Repository) *Service {

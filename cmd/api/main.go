@@ -7,12 +7,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/arskydev/weatherman/pkg/db"
-	"github.com/arskydev/weatherman/pkg/handlers"
 	"github.com/arskydev/weatherman/pkg/repository"
 	"github.com/arskydev/weatherman/pkg/server"
 	"github.com/arskydev/weatherman/pkg/service"
-	"gopkg.in/yaml.v3"
+	"github.com/arskydev/weatherman/pkg/web/handlers"
 )
 
 type AppConfig struct {

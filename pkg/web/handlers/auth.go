@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/arskydev/weatherman/pkg/users"
+	"github.com/arskydev/weatherman/pkg/web/internal/responder"
 )
 
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
@@ -16,13 +17,13 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Invalid request body"
-		h.sendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorResponse(msg, http.StatusBadRequest, w, err)
 		return
 	}
 
 	if err := json.Unmarshal(body, &user); err != nil {
 		msg := "Invalid username, email and password passed"
-		h.sendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorResponse(msg, http.StatusBadRequest, w, err)
 		return
 	}
 
@@ -30,12 +31,12 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while creating user: " + err.Error()
-		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
 		return
 	}
 
 	resp := map[string]string{"id": strconv.Itoa(id)}
-	h.sendSimpleResponse(resp, http.StatusCreated, w)
+	responder.JSONResp(resp, http.StatusCreated, w)
 }
 
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
@@ -45,13 +46,13 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Invalid request body"
-		h.sendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorResponse(msg, http.StatusBadRequest, w, err)
 		return
 	}
 
 	if err := json.Unmarshal(body, &user); err != nil {
 		msg := "Invalid username and password"
-		h.sendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorResponse(msg, http.StatusBadRequest, w, err)
 		return
 	}
 
@@ -59,10 +60,10 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while creating user: " + err.Error()
-		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
 		return
 	}
 
 	resp := map[string]string{"token": token}
-	h.sendSimpleResponse(resp, http.StatusOK, w)
+	responder.JSONResp(resp, http.StatusOK, w)
 }
