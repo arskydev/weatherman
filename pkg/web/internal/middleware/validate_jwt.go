@@ -17,7 +17,7 @@ func (m *Middleware) ValidateJWT(next func(http.ResponseWriter, *http.Request)) 
 		defer r.Body.Close()
 		if r.Header[AUTH_HEADER_NAME] == nil {
 			msg := "empty token"
-			responder.SendErrorResponse(msg, http.StatusUnauthorized, w, errors.New(msg))
+			responder.SendErrorResponse(msg, w, errors.New(msg))
 			return
 		}
 
@@ -25,7 +25,7 @@ func (m *Middleware) ValidateJWT(next func(http.ResponseWriter, *http.Request)) 
 
 		if err != nil {
 			msg := "Access denied"
-			responder.SendErrorResponse(msg, http.StatusForbidden, w, err)
+			responder.SendErrorResponse(msg, w, err)
 			return
 		}
 

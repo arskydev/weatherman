@@ -14,7 +14,7 @@ func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while getting user IP"
-		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, w, err)
 		return
 	}
 
@@ -22,7 +22,7 @@ func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while getting weather"
-		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, w, err)
 		return
 	}
 
@@ -30,7 +30,7 @@ func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while formating JSON response"
-		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, w, err)
 		return
 	}
 

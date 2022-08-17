@@ -17,13 +17,13 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Invalid request body"
-		responder.SendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorResponse(msg, w, err)
 		return
 	}
 
 	if err := json.Unmarshal(body, &user); err != nil {
 		msg := "Invalid username, email and password passed"
-		responder.SendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorResponse(msg, w, err)
 		return
 	}
 
@@ -31,12 +31,12 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while creating user: " + err.Error()
-		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, w, err)
 		return
 	}
 
 	resp := map[string]string{"id": strconv.Itoa(id)}
-	responder.SendJSONResponse(resp, http.StatusCreated, w)
+	responder.SendJSONResponse(resp, w)
 }
 
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
@@ -46,13 +46,13 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Invalid request body"
-		responder.SendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorResponse(msg, w, err)
 		return
 	}
 
 	if err := json.Unmarshal(body, &user); err != nil {
 		msg := "Invalid username and password"
-		responder.SendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorResponse(msg, w, err)
 		return
 	}
 
@@ -60,10 +60,10 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while creating user: " + err.Error()
-		responder.SendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		responder.SendErrorResponse(msg, w, err)
 		return
 	}
 
 	resp := map[string]string{"token": token}
-	responder.SendJSONResponse(resp, http.StatusOK, w)
+	responder.SendJSONResponse(resp, w)
 }

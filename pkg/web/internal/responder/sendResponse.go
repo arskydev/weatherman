@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func jsonResponse(resp map[string]string, statusCode int, w http.ResponseWriter) {
+func jsonResponse(resp map[string]string, w http.ResponseWriter) {
 	js, err := json.Marshal(resp)
 
 	if err != nil {
@@ -19,12 +19,12 @@ func jsonResponse(resp map[string]string, statusCode int, w http.ResponseWriter)
 	w.Write(js)
 }
 
-func SendJSONResponse(resp map[string]string, statusCode int, w http.ResponseWriter) {
-	jsonResponse(resp, statusCode, w)
+func SendJSONResponse(resp map[string]string, w http.ResponseWriter) {
+	jsonResponse(resp, w)
 }
 
-func SendErrorResponse(msg string, statusCode int, w http.ResponseWriter, err error) {
+func SendErrorResponse(msg string, w http.ResponseWriter, err error) {
 	resp := map[string]string{"msg": msg}
-	jsonResponse(resp, statusCode, w)
+	jsonResponse(resp, w)
 	log.Println("Error while reading request body", err)
 }
