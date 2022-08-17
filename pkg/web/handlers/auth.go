@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strconv"
@@ -16,22 +17,24 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		msg := "Invalid request body"
-		responder.SendErrorResponse(msg, w, err)
+		msg := "invalid request body"
+		statusCode := http.StatusBadRequest
+		responder.ErrorSampleTextResponse(msg, statusCode, w, errors.New(msg))
 		return
 	}
 
 	if err := json.Unmarshal(body, &user); err != nil {
 		msg := "Invalid username, email and password passed"
-		responder.SendErrorResponse(msg, w, err)
+		responder.SendErrorJSONResponse(msg, w, err)
 		return
 	}
 
 	id, err := h.service.Authorization.CreateUser(user)
 
 	if err != nil {
-		msg := "Error while creating user: " + err.Error()
-		responder.SendErrorResponse(msg, w, err)
+		msg := "error while creating user: " + err.Error()
+		statusCode := http.StatusInternalServerError
+		responder.ErrorSampleTextResponse(msg, statusCode, w, errors.New(msg))
 		return
 	}
 
@@ -45,14 +48,15 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		msg := "Invalid request body"
-		responder.SendErrorResponse(msg, w, err)
+		msg := "invalid request body"
+		statusCode := http.StatusBadRequest
+		responder.ErrorSampleTextResponse(msg, statusCode, w, errors.New(msg))
 		return
 	}
 
 	if err := json.Unmarshal(body, &user); err != nil {
 		msg := "Invalid username and password"
-		responder.SendErrorResponse(msg, w, err)
+		responder.SendErrorJSONResponse(msg, w, err)
 		return
 	}
 
@@ -60,7 +64,8 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while creating user: " + err.Error()
-		responder.SendErrorResponse(msg, w, err)
+		statusCode := http.StatusInternalServerError
+		responder.ErrorSampleTextResponse(msg, statusCode, w, errors.New(msg))
 		return
 	}
 

@@ -19,11 +19,21 @@ func jsonResponse(resp map[string]string, w http.ResponseWriter) {
 	w.Write(js)
 }
 
+func sampleTextResponse(msg string, statusCode int, w http.ResponseWriter) {
+	w.WriteHeader(statusCode)
+	w.Write([]byte(msg))
+}
+
+func ErrorSampleTextResponse(msg string, statusCode int, w http.ResponseWriter, err error) {
+	sampleTextResponse(msg, statusCode, w)
+	log.Println(err)
+}
+
 func SendJSONResponse(resp map[string]string, w http.ResponseWriter) {
 	jsonResponse(resp, w)
 }
 
-func SendErrorResponse(msg string, w http.ResponseWriter, err error) {
+func SendErrorJSONResponse(msg string, w http.ResponseWriter, err error) {
 	resp := map[string]string{"msg": msg}
 	jsonResponse(resp, w)
 	log.Println("Error while reading request body", err)
