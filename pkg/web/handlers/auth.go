@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/arskydev/weatherman/pkg/users"
+	"github.com/arskydev/weatherman/pkg/web/internal/responder"
 )
 
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
@@ -15,27 +17,29 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		msg := "Invalid request body"
-		h.sendErrorResponse(msg, http.StatusBadRequest, w, err)
+		msg := "invalid request body"
+		statusCode := http.StatusBadRequest
+		responder.ErrorSampleTextResponse(msg, statusCode, w, errors.New(msg))
 		return
 	}
 
 	if err := json.Unmarshal(body, &user); err != nil {
 		msg := "Invalid username, email and password passed"
-		h.sendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorJSONResponse(msg, w, err)
 		return
 	}
 
 	id, err := h.service.Authorization.CreateUser(user)
 
 	if err != nil {
-		msg := "Error while creating user: " + err.Error()
-		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		msg := "error while creating user: " + err.Error()
+		statusCode := http.StatusInternalServerError
+		responder.ErrorSampleTextResponse(msg, statusCode, w, errors.New(msg))
 		return
 	}
 
 	resp := map[string]string{"id": strconv.Itoa(id)}
-	h.sendSimpleResponse(resp, http.StatusCreated, w)
+	responder.SendJSONResponse(resp, w)
 }
 
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
@@ -44,14 +48,15 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		msg := "Invalid request body"
-		h.sendErrorResponse(msg, http.StatusBadRequest, w, err)
+		msg := "invalid request body"
+		statusCode := http.StatusBadRequest
+		responder.ErrorSampleTextResponse(msg, statusCode, w, errors.New(msg))
 		return
 	}
 
 	if err := json.Unmarshal(body, &user); err != nil {
 		msg := "Invalid username and password"
-		h.sendErrorResponse(msg, http.StatusBadRequest, w, err)
+		responder.SendErrorJSONResponse(msg, w, err)
 		return
 	}
 
@@ -59,10 +64,11 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		msg := "Error while creating user: " + err.Error()
-		h.sendErrorResponse(msg, http.StatusInternalServerError, w, err)
+		statusCode := http.StatusInternalServerError
+		responder.ErrorSampleTextResponse(msg, statusCode, w, errors.New(msg))
 		return
 	}
 
 	resp := map[string]string{"token": token}
-	h.sendSimpleResponse(resp, http.StatusOK, w)
+	responder.SendJSONResponse(resp, w)
 }

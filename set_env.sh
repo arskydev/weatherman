@@ -1,6 +1,10 @@
 #!/bin/sh
 # set_env.sh
 
+echo "Initiating files..."
+cp Dockerfile_raw Dockerfile
+cp config/db_config_raw.yaml config/db_config.yaml
+
 echo "Set PostgreSQL db password:"
 read pg_pass
 sed -i "s/PG_PASS/$pg_pass/g" Dockerfile
