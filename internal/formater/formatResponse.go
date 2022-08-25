@@ -27,6 +27,22 @@ Sunset: %v`,
 }
 
 func FormatWeatherJson(w *weather.Weather) ([]byte, error) {
+	//tbh, gophers are not lazy beings. And we do like this:
+	//jsonWeather := struct {
+	//	Location struct {
+	//		Country string `json:"country,omitempty"`
+	//		Flag    string `json:"flag,omitempty"`
+	//		City    string `json:"city,omitempty"`
+	//	} `json:"location"`
+	//	Weather struct {
+	//		Temperature float64 `json:"temperature,omitempty"`
+	//		WeatherType string  `json:"weatherType,omitempty"`
+	//		//}
+	//	} `json:"weather"`
+	//
+	//}{}
+	// etc
+
 	jsonWeather := struct {
 		Location map[string]interface{} `json:"location"`
 		// country     string
@@ -56,6 +72,5 @@ func FormatWeatherJson(w *weather.Weather) ([]byte, error) {
 			"sunset":  w.Sunset.Format(time.RFC822Z),
 		},
 	}
-
 	return json.Marshal(jsonWeather)
 }

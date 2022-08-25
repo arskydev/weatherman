@@ -17,22 +17,22 @@ import (
 )
 
 type AppConfig struct {
-	CONF_PATH     string `yaml:"CONF_PATH"`
+	ConfPath      string `yaml:"CONF_PATH"` // I know it's not an intuitive way to define consts names this way, but it's the Go way.
 	PASS_ENV_NAME string `yaml:"PASS_ENV_NAME"`
 	APP_PORT      string `yaml:"APP_PORT"`
 }
 
 const (
-	APP_CONF_PATH = "config/app_config.yaml"
+	AppConfPath = "config/app_config.yaml" // move to env variable and set a default value to a static one.
 )
 
 func main() {
-	appConfig, err := NewAppConfig(APP_CONF_PATH)
+	appConfig, err := newAppConfig(AppConfPath) // passing a const as param to local func is a bad style
 	if err != nil {
 		log.Fatal("Error while gathering app config", err)
 	}
 
-	pgCfg, err := db.NewPGConfig(appConfig.CONF_PATH, appConfig.PASS_ENV_NAME)
+	pgCfg, err := db.NewPGConfig(appConfig.ConfPath, appConfig.PASS_ENV_NAME)
 
 	if err != nil {
 		log.Fatal("Error while initiating db config:", err)
@@ -67,15 +67,18 @@ func main() {
 
 }
 
-func NewAppConfig(confPath string) (*AppConfig, error) {
-	yfile, err := ioutil.ReadFile(confPath)
+//this func should not be called outside of main func.
+// Still it returns an exported object, perhaps should be moved to a separate package, plus using const as param name.
+// It makes sense, but this approach is OK too
+func newAppConfig(confPath string) (*AppConfig, error) {
+	yamlFile, err := ioutil.ReadFile(confPath)
 
 	if err != nil {
 		return nil, err
 	}
 
 	conf := &AppConfig{}
-	err = yaml.Unmarshal(yfile, conf)
+	err = yaml.Unmarshal(yamlFile, conf)
 
 	if err != nil {
 		return nil, err
