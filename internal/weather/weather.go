@@ -1,18 +1,16 @@
 package weather
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/arskydev/weatherman/internal/coordinates"
 	"github.com/arskydev/weatherman/internal/requester"
-	"github.com/arskydev/weatherman/internal/url"
+	"github.com/arskydev/weatherman/internal/urlBuilder"
 )
 
 const (
-	WEATHERAPI_URL_BASE = "https://api.openweathermap.org/data/2.5/weather?lat=%v&lon=%v&appid=%v&units=metric"
+	weatherApiUrlBase = "https://api.openweathermap.org/data/2.5/weather?lat=%v&lon=%v&appid=%v&units=metric"
 )
 
 type Weather struct {
@@ -34,39 +32,33 @@ func New(c *coordinates.Coordinator, weatherApiKey string) *Weatherer {
 	}
 }
 
-// These two methods should get the logic from internal/formater/formatResponse.go
-func (w Weather) MarshalJSON() ([]byte, error) {
-	return []byte("{\"here you can put some stuff\"})"), nil
-}
-
-func (w Weather) String() string {
-	return "now you can print me!"
-}
-
-func GetWeather(ip string) (weather *Weather, err error) {
-	c, err := coordinates.GetCoordinates(ip)
+func (w *Weatherer) GetWeather(ip string) (weather *Weather, err error) {
+	c, err := w.coordinator.Get(ip)
 
 	if err != nil {
 		return nil, fmt.Errorf("error on GetCoordinates: %w", err)
 	}
 
-	weatherApiKey := os.Getenv("WEATHER_API_KEY") //Take a look at note internal/coordinates/coordinates.go
-
-	if weatherApiKey == "" {
-		return nil, errors.New("no WEATHER_API_KEY passed")
-	}
-
-	weatherArgs := []interface{}{c.Latitude, c.Longitude, weatherApiKey}
-	url := url.BuildURL(WEATHERAPI_URL_BASE, weatherArgs...)
+	weatherArgs := []interface{}{c.Latitude, c.Longitude, w.weatherApiKey}
+	url := urlBuilder.BuildURL(weatherApiUrlBase, weatherArgs...)
 	jsonResp, err := requester.GetJsonResp(url)
 
 	if err != nil {
-		return weather, err
+		return nil, err
 	}
 
 	weather = generateWeather(jsonResp)
 
 	return weather, nil
+}
+
+// These two methods should get the logic from internal/formater/formatResponse.go
+func (w *Weather) MarshalJSON() ([]byte, error) {
+	return []byte("{\"here you can put some stuff\"})"), nil
+}
+
+func (w *Weather) String() string {
+	return "now you can print me!"
 }
 
 // please avoid using map[string]interface{} when unmarshalling json.

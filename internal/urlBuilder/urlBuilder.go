@@ -1,4 +1,4 @@
-package url
+package urlBuilder
 
 import (
 	"fmt"
