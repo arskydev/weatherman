@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
 
-	"gopkg.in/yaml.v3"
-
+	"github.com/arskydev/weatherman/internal/coordinates"
+	"github.com/arskydev/weatherman/internal/weather"
+	"github.com/arskydev/weatherman/pkg/config"
 	"github.com/arskydev/weatherman/pkg/db"
 	"github.com/arskydev/weatherman/pkg/repository"
 	"github.com/arskydev/weatherman/pkg/server"
@@ -16,23 +17,19 @@ import (
 	"github.com/arskydev/weatherman/pkg/web/handlers"
 )
 
-type AppConfig struct {
-	ConfPath      string `yaml:"CONF_PATH"` // I know it's not an intuitive way to define consts names this way, but it's the Go way.
-	PASS_ENV_NAME string `yaml:"PASS_ENV_NAME"`
-	APP_PORT      string `yaml:"APP_PORT"`
-}
-
-const (
-	AppConfPath = "config/app_config.yaml" // move to env variable and set a default value to a static one.
-)
-
 func main() {
-	appConfig, err := newAppConfig(AppConfPath) // passing a const as param to local func is a bad style
+	var (
+		appConfigPath = "config/app_config.yaml"
+		ipGeoKey      = os.Getenv("IPGEO_API_KEY")
+		weatherApiKey = os.Getenv("WEATHER_API_KEY")
+	)
+
+	appConfig, err := config.NewAppConfig(appConfigPath)
 	if err != nil {
 		log.Fatal("Error while gathering app config", err)
 	}
 
-	pgCfg, err := db.NewPGConfig(appConfig.ConfPath, appConfig.PASS_ENV_NAME)
+	pgCfg, err := db.NewPGConfig(appConfig.ConfPath, appConfig.PassEnvName)
 
 	if err != nil {
 		log.Fatal("Error while initiating db config:", err)
@@ -49,13 +46,16 @@ func main() {
 		log.Fatal("Error while initiating repository:", err)
 	}
 
+	coordinator := coordinates.New(ipGeoKey)
+	weatherer := weather.New(coordinator, weatherApiKey)
+
 	service := service.NewService(repo)
-	handler := handlers.NewHandler(service)
+	handler := handlers.NewHandler(service, weatherer)
 	server := server.NewServer(handler.InitRoutes())
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 
-	if err := server.Run(ctx, appConfig.APP_PORT); err != nil {
+	if err := server.Run(ctx, appConfig.AppPort); err != nil {
 		log.Printf("Error raised while server run:\n%s", err.Error())
 	}
 
@@ -65,24 +65,4 @@ func main() {
 	}
 	log.Println("Closing db connect... Done")
 
-}
-
-//this func should not be called outside of main func.
-// Still it returns an exported object, perhaps should be moved to a separate package, plus using const as param name.
-// It makes sense, but this approach is OK too
-func newAppConfig(confPath string) (*AppConfig, error) {
-	yamlFile, err := ioutil.ReadFile(confPath)
-
-	if err != nil {
-		return nil, err
-	}
-
-	conf := &AppConfig{}
-	err = yaml.Unmarshal(yamlFile, conf)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return conf, nil
 }

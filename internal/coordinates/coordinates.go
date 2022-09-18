@@ -2,9 +2,10 @@ package coordinates
 
 import (
 	"errors"
+	"os"
+
 	"github.com/arskydev/weatherman/internal/requester"
 	"github.com/arskydev/weatherman/internal/url"
-	"os"
 )
 
 const (
@@ -20,13 +21,13 @@ type Coordinator struct {
 	ipGEOKey string
 }
 
-func New(ipGeoKey string) Coordinator {
-	return Coordinator{
+func New(ipGeoKey string) *Coordinator {
+	return &Coordinator{
 		ipGEOKey: ipGeoKey,
 	}
 }
 
-//this is just an example how can we avoid using os.Getenv("IPGEO_API_KEY") in this package
+// this is just an example how can we avoid using os.Getenv("IPGEO_API_KEY") in this package
 func (c *Coordinator) Get(ip string) (*Coordinates, error) {
 	return nil, nil
 }
