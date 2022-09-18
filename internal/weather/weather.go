@@ -22,6 +22,15 @@ type Weather struct {
 	Country, City   string
 }
 
+// These two methods should get the logic from internal/formater/formatResponse.go
+func (w Weather) MarshalJSON() ([]byte, error) {
+	return []byte("{\"here you can put some stuff\"})"), nil
+}
+
+func (w Weather) String() string {
+	return "now you can print me!"
+}
+
 func GetWeather(ip string) (weather *Weather, err error) {
 	c, err := coordinates.GetCoordinates(ip)
 
@@ -29,7 +38,7 @@ func GetWeather(ip string) (weather *Weather, err error) {
 		return nil, fmt.Errorf("error on GetCoordinates: %w", err)
 	}
 
-	weatherApiKey := os.Getenv("WEATHER_API_KEY")
+	weatherApiKey := os.Getenv("WEATHER_API_KEY") //Take a look at note internal/coordinates/coordinates.go
 
 	if weatherApiKey == "" {
 		return nil, errors.New("no WEATHER_API_KEY passed")
@@ -48,6 +57,8 @@ func GetWeather(ip string) (weather *Weather, err error) {
 	return weather, nil
 }
 
+//please avoid using map[string]interface{} when unmarshalling json.
+//@see internal/requester/requester.go
 func jsonRespParser(jsonResp map[string]interface{}, key string) map[string]interface{} {
 	switch key {
 

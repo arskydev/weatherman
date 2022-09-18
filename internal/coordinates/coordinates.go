@@ -2,11 +2,9 @@ package coordinates
 
 import (
 	"errors"
-	"os"
-	"strconv"
-
 	"github.com/arskydev/weatherman/internal/requester"
 	"github.com/arskydev/weatherman/internal/url"
+	"os"
 )
 
 const (
@@ -14,51 +12,40 @@ const (
 )
 
 type Coordinates struct {
-	Latitude, Longitude float64
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type Coordinator struct {
+	ipGEOKey string
+}
+
+func New(ipGeoKey string) Coordinator {
+	return Coordinator{
+		ipGEOKey: ipGeoKey,
+	}
+}
+
+//this is just an example how can we avoid using os.Getenv("IPGEO_API_KEY") in this package
+func (c *Coordinator) Get(ip string) (*Coordinates, error) {
+	return nil, nil
 }
 
 func GetCoordinates(ip string) (*Coordinates, error) {
-	ipgeoApiKey := os.Getenv("IPGEO_API_KEY")
+	ipgeoApiKey := os.Getenv("IPGEO_API_KEY") // This should be moved out of here
 
 	if ipgeoApiKey == "" {
 		return nil, errors.New("no IPGEO_API_KEY passed")
 	}
 
-	coordArgs := []interface{}{ipgeoApiKey, ip}
-	url := url.BuildURL(IP_GEO_URL_BASE, coordArgs...)
-	jsonResp, err := requester.GetJsonResp(url)
-
-	if err != nil {
+	//coordArgs := []interface{}{ipgeoApiKey, ip}
+	// this is a bit more readable. It's OK to unpack if we get the slice from somewhere
+	//url name collides with package name. We want to avoid it
+	ipGEOurl := url.BuildURL(IP_GEO_URL_BASE, ipgeoApiKey, ip)
+	//Sorry, I just had to rework it a bit. Linus said "Words are cheap, show me the code". I'm showing.
+	c := &Coordinates{}
+	if err := requester.GetJson(ipGEOurl, c); err != nil {
 		return nil, err
 	}
-
-	latt, ok := jsonResp["latitude"].(string)
-
-	if !ok {
-		return nil, errors.New("no lattitude in response")
-	} else {
-		latt = latt[:4]
-	}
-
-	longit, ok := jsonResp["longitude"].(string)
-
-	if !ok {
-		return nil, errors.New("no longitude in response")
-	} else {
-		longit = longit[:4]
-	}
-
-	latitude, err := strconv.ParseFloat(latt, 64)
-
-	if err != nil {
-		return nil, err
-	}
-
-	longitude, err := strconv.ParseFloat(longit, 64)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &Coordinates{Latitude: latitude, Longitude: longitude}, nil
+	return c, nil
 }
