@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	_ "github.com/lib/pq"
 	"gopkg.in/yaml.v3"
@@ -25,7 +24,7 @@ type PostgresConnect struct {
 	conn *sql.DB
 }
 
-func NewPGConfig(confPath, dbPassEnvName string) (*PGConfig, error) {
+func NewPGConfig(confPath, dbPass string) (*PGConfig, error) {
 	yfile, err := ioutil.ReadFile(confPath)
 
 	if err != nil {
@@ -39,7 +38,7 @@ func NewPGConfig(confPath, dbPassEnvName string) (*PGConfig, error) {
 		return nil, err
 	}
 
-	conf.Password = os.Getenv(dbPassEnvName)
+	conf.Password = dbPass
 
 	if conf.Password == "" {
 		return nil, errors.New("no password for db set")

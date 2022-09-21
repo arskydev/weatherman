@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
 
-	"gopkg.in/yaml.v3"
-
+	"github.com/arskydev/weatherman/internal/coordinates"
+	"github.com/arskydev/weatherman/internal/weather"
 	"github.com/arskydev/weatherman/pkg/db"
 	"github.com/arskydev/weatherman/pkg/repository"
 	"github.com/arskydev/weatherman/pkg/server"
@@ -16,23 +16,28 @@ import (
 	"github.com/arskydev/weatherman/pkg/web/handlers"
 )
 
-type AppConfig struct {
-	CONF_PATH     string `yaml:"CONF_PATH"`
-	PASS_ENV_NAME string `yaml:"PASS_ENV_NAME"`
-	APP_PORT      string `yaml:"APP_PORT"`
-}
-
-const (
-	APP_CONF_PATH = "config/app_config.yaml"
-)
-
 func main() {
-	appConfig, err := NewAppConfig(APP_CONF_PATH)
-	if err != nil {
-		log.Fatal("Error while gathering app config", err)
+	var (
+		confPath      = "config/db_config.yaml"
+		appPort       = "8888"
+		ipGeoKey      = os.Getenv("IPGEO_API_KEY")
+		weatherApiKey = os.Getenv("WEATHER_API_KEY")
+		dbPass        = os.Getenv("DB_PASS")
+	)
+
+	if ipGeoKey == "" {
+		log.Fatal("IPGEO_API_KEY environment variable is not set!")
 	}
 
-	pgCfg, err := db.NewPGConfig(appConfig.CONF_PATH, appConfig.PASS_ENV_NAME)
+	if weatherApiKey == "" {
+		log.Fatal("WEATHER_API_KEY environment variable is not set!")
+	}
+
+	if dbPass == "" {
+		log.Fatal("DB_PASS environment variable is not set!")
+	}
+
+	pgCfg, err := db.NewPGConfig(confPath, dbPass)
 
 	if err != nil {
 		log.Fatal("Error while initiating db config:", err)
@@ -49,13 +54,16 @@ func main() {
 		log.Fatal("Error while initiating repository:", err)
 	}
 
+	coordinator := coordinates.New(ipGeoKey)
+	weatherer := weather.NewWeatherer(coordinator, weatherApiKey)
+
 	service := service.NewService(repo)
-	handler := handlers.NewHandler(service)
+	handler := handlers.NewHandler(service, weatherer)
 	server := server.NewServer(handler.InitRoutes())
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 
-	if err := server.Run(ctx, appConfig.APP_PORT); err != nil {
+	if err := server.Run(ctx, appPort); err != nil {
 		log.Printf("Error raised while server run:\n%s", err.Error())
 	}
 
@@ -65,21 +73,4 @@ func main() {
 	}
 	log.Println("Closing db connect... Done")
 
-}
-
-func NewAppConfig(confPath string) (*AppConfig, error) {
-	yfile, err := ioutil.ReadFile(confPath)
-
-	if err != nil {
-		return nil, err
-	}
-
-	conf := &AppConfig{}
-	err = yaml.Unmarshal(yfile, conf)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return conf, nil
 }

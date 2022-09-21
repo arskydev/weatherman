@@ -3,18 +3,21 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/arskydev/weatherman/internal/weather"
 	"github.com/arskydev/weatherman/pkg/service"
 	"github.com/arskydev/weatherman/pkg/web/internal/middleware"
 	"github.com/gorilla/mux"
 )
 
 type Handler struct {
-	service *service.Service
+	service   *service.Service
+	weatherer *weather.Weatherer
 }
 
-func NewHandler(s *service.Service) *Handler {
+func NewHandler(s *service.Service, w *weather.Weatherer) *Handler {
 	return &Handler{
-		service: s,
+		service:   s,
+		weatherer: w,
 	}
 
 }

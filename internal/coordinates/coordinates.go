@@ -1,64 +1,48 @@
 package coordinates
 
 import (
-	"errors"
-	"os"
-	"strconv"
+	"net/url"
 
 	"github.com/arskydev/weatherman/internal/requester"
-	"github.com/arskydev/weatherman/internal/url"
-)
-
-const (
-	IP_GEO_URL_BASE = "https://api.ipgeolocation.io/ipgeo?apiKey=%v&ip=%v"
+	"github.com/arskydev/weatherman/pkg/web/urls"
 )
 
 type Coordinates struct {
-	Latitude, Longitude float64
+	Latitude  string `json:"latitude"`
+	Longitude string `json:"longitude"`
 }
 
-func GetCoordinates(ip string) (*Coordinates, error) {
-	ipgeoApiKey := os.Getenv("IPGEO_API_KEY")
+type Coordinator struct {
+	ipGEOKey string
+}
 
-	if ipgeoApiKey == "" {
-		return nil, errors.New("no IPGEO_API_KEY passed")
+func New(ipGeoKey string) *Coordinator {
+	return &Coordinator{
+		ipGEOKey: ipGeoKey,
 	}
+}
 
-	coordArgs := []interface{}{ipgeoApiKey, ip}
-	url := url.BuildURL(IP_GEO_URL_BASE, coordArgs...)
-	jsonResp, err := requester.GetJsonResp(url)
+func (c *Coordinator) Get(ip string) (*Coordinates, error) {
+	var (
+		ipGeoUrl = &url.URL{
+			Scheme:     "https",
+			Host:       "api.ipgeolocation.io",
+			Path:       "/ipgeo",
+			ForceQuery: false,
+		}
+	)
+	ipGeoUrlQuery := map[string]string{
+		"apiKey": c.ipGEOKey,
+		"ip":     ip,
+	}
+	urls.SetURLQuery(ipGeoUrl, ipGeoUrlQuery)
+	coords := Coordinates{}
 
-	if err != nil {
+	if err := requester.GetJson(ipGeoUrl.String(), &coords); err != nil {
 		return nil, err
 	}
 
-	latt, ok := jsonResp["latitude"].(string)
-
-	if !ok {
-		return nil, errors.New("no lattitude in response")
-	} else {
-		latt = latt[:4]
-	}
-
-	longit, ok := jsonResp["longitude"].(string)
-
-	if !ok {
-		return nil, errors.New("no longitude in response")
-	} else {
-		longit = longit[:4]
-	}
-
-	latitude, err := strconv.ParseFloat(latt, 64)
-
-	if err != nil {
-		return nil, err
-	}
-
-	longitude, err := strconv.ParseFloat(longit, 64)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &Coordinates{Latitude: latitude, Longitude: longitude}, nil
+	coords.Latitude = coords.Latitude[:4]
+	coords.Longitude = coords.Longitude[:4]
+	return &coords, nil
 }

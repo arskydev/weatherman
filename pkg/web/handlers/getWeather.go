@@ -4,9 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/arskydev/weatherman/internal/formater"
 	"github.com/arskydev/weatherman/internal/network"
-	"github.com/arskydev/weatherman/internal/weather"
 	"github.com/arskydev/weatherman/pkg/web/internal/responder"
 )
 
@@ -20,7 +18,7 @@ func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_weather, err := weather.GetWeather(ip)
+	_weather, err := h.weatherer.GetWeather(ip)
 
 	if err != nil {
 		msg := "error while getting weather"
@@ -29,7 +27,7 @@ func (h *Handler) getWeather(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	j, err := formater.FormatWeatherJson(_weather)
+	j, err := _weather.MarshalJSON()
 
 	if err != nil {
 		msg := "error while formating JSON response"
