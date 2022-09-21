@@ -1,3 +1,0 @@
-CONF_PATH    : "config/db_config.yaml"
-PASS_ENV_NAME: "DB_PASS"
-APP_PORT     : "8888"

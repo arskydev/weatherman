@@ -2,26 +2,28 @@ package network
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/arskydev/weatherman/internal/requester"
 )
 
-var (
-	url = "https://api.ipgeolocation.io/getip"
-)
-
 func GetLocalIP() (ip string, err error) {
-	jsonResp, err := requester.GetJsonResp(url)
+	var (
+		url = "https://api.ipgeolocation.io/getip"
+	)
+	jsonResp := &struct {
+		Ip string `json:"ip"`
+	}{}
+	err = requester.GetJson(url, jsonResp)
+	fmt.Println()
 
 	if err != nil {
 		return "", err
 	}
 
-	ip, ok := jsonResp["ip"].(string)
-
-	if !ok {
+	if jsonResp.Ip == "" {
 		return "", errors.New("cannot get local ip. no such field in response")
 	}
 
-	return ip, nil
+	return jsonResp.Ip, nil
 }

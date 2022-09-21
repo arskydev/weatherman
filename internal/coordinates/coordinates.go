@@ -1,17 +1,15 @@
 package coordinates
 
 import (
-	"github.com/arskydev/weatherman/internal/requester"
-	"github.com/arskydev/weatherman/internal/urlBuilder"
-)
+	"net/url"
 
-const (
-	ipGeoUrlBase = "https://api.ipgeolocation.io/ipgeo?apiKey=%v&ip=%v"
+	"github.com/arskydev/weatherman/internal/requester"
+	"github.com/arskydev/weatherman/pkg/web/urls"
 )
 
 type Coordinates struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	Latitude  string `json:"latitude"`
+	Longitude string `json:"longitude"`
 }
 
 type Coordinator struct {
@@ -24,15 +22,27 @@ func New(ipGeoKey string) *Coordinator {
 	}
 }
 
-// this is just an example how can we avoid using os.Getenv("IPGEO_API_KEY") in this package
 func (c *Coordinator) Get(ip string) (*Coordinates, error) {
+	var (
+		ipGeoUrl = &url.URL{
+			Scheme:     "https",
+			Host:       "api.ipgeolocation.io",
+			Path:       "/ipgeo",
+			ForceQuery: false,
+		}
+	)
+	ipGeoUrlQuery := map[string]string{
+		"apiKey": c.ipGEOKey,
+		"ip":     ip,
+	}
+	urls.SetURLQuery(ipGeoUrl, ipGeoUrlQuery)
+	coords := Coordinates{}
 
-	ipGEOurl := urlBuilder.BuildURL(ipGeoUrlBase, c.ipGEOKey, ip)
-	coords := &Coordinates{}
-
-	if err := requester.GetJson(ipGEOurl, coords); err != nil {
+	if err := requester.GetJson(ipGeoUrl.String(), &coords); err != nil {
 		return nil, err
 	}
 
-	return coords, nil
+	coords.Latitude = coords.Latitude[:4]
+	coords.Longitude = coords.Longitude[:4]
+	return &coords, nil
 }

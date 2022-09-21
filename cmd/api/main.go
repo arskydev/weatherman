@@ -9,7 +9,6 @@ import (
 
 	"github.com/arskydev/weatherman/internal/coordinates"
 	"github.com/arskydev/weatherman/internal/weather"
-	"github.com/arskydev/weatherman/pkg/config"
 	"github.com/arskydev/weatherman/pkg/db"
 	"github.com/arskydev/weatherman/pkg/repository"
 	"github.com/arskydev/weatherman/pkg/server"
@@ -19,17 +18,26 @@ import (
 
 func main() {
 	var (
-		appConfigPath = "config/app_config.yaml"
+		confPath      = "config/db_config.yaml"
+		appPort       = "8888"
 		ipGeoKey      = os.Getenv("IPGEO_API_KEY")
 		weatherApiKey = os.Getenv("WEATHER_API_KEY")
+		dbPass        = os.Getenv("DB_PASS")
 	)
 
-	appConfig, err := config.NewAppConfig(appConfigPath)
-	if err != nil {
-		log.Fatal("Error while gathering app config", err)
+	if ipGeoKey == "" {
+		log.Fatal("IPGEO_API_KEY environment variable is not set!")
 	}
 
-	pgCfg, err := db.NewPGConfig(appConfig.ConfPath, appConfig.PassEnvName)
+	if weatherApiKey == "" {
+		log.Fatal("WEATHER_API_KEY environment variable is not set!")
+	}
+
+	if dbPass == "" {
+		log.Fatal("DB_PASS environment variable is not set!")
+	}
+
+	pgCfg, err := db.NewPGConfig(confPath, dbPass)
 
 	if err != nil {
 		log.Fatal("Error while initiating db config:", err)
@@ -47,7 +55,7 @@ func main() {
 	}
 
 	coordinator := coordinates.New(ipGeoKey)
-	weatherer := weather.New(coordinator, weatherApiKey)
+	weatherer := weather.NewWeatherer(coordinator, weatherApiKey)
 
 	service := service.NewService(repo)
 	handler := handlers.NewHandler(service, weatherer)
@@ -55,7 +63,7 @@ func main() {
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 
-	if err := server.Run(ctx, appConfig.AppPort); err != nil {
+	if err := server.Run(ctx, appPort); err != nil {
 		log.Printf("Error raised while server run:\n%s", err.Error())
 	}
 
